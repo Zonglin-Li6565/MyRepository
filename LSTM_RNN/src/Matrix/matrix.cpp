@@ -27,7 +27,7 @@ matrix::row_::row_(int size)
 
 double& matrix::row_::operator[](int index)
 {
-	if(index > size_)
+	if (index > size_)
 		throw runtime_error("index out of bound");
 	return array_[index];
 }
@@ -39,7 +39,7 @@ matrix::matrix()
 	arraycols = dimension_c_ + extra;
 	for (int i = 0; i < dimension_r_; i++)
 	{
-		row_heads.add(new row_(arraycols));
+		row_heads.add(*(new row_(arraycols)));
 	}
 }
 
@@ -50,9 +50,8 @@ matrix::matrix(dimension& d)
 	arraycols = dimension_c_ + extra;
 	for (int i = 0; i < dimension_r_; i++)
 	{
-		row_heads.add(new row_(arraycols));
+		row_heads.add(*(new row_(arraycols)));
 	}
-	delete &d;
 }
 
 matrix::matrix(dimension& d, string name)
@@ -63,9 +62,8 @@ matrix::matrix(dimension& d, string name)
 	arraycols = dimension_c_ + extra;
 	for (int i = 0; i < dimension_r_; i++)
 	{
-		row_heads.add(new row_(arraycols));
+		row_heads.add(*(new row_(arraycols)));
 	}
-	delete &d;
 }
 
 matrix::matrix(matrix& copy)
@@ -76,8 +74,8 @@ matrix::matrix(matrix& copy)
 	arraycols = dimension_c_ + extra;
 	for (int i = 0; i < dimension_r_; i++)
 	{
-		row_heads.add(new row_(arraycols));
-		for(int j = 0; j < dimension_c_; j++)
+		row_heads.add(*(new row_(arraycols)));
+		for (int j = 0; j < dimension_c_; j++)
 		{
 			row_heads[i][j] = copy[i][j];
 		}
@@ -102,7 +100,7 @@ void matrix::addrows(int index, int num_r)
 	if (index < 0 || index > dimension_r_)
 		throw runtime_error("invalid index number to add rows");
 	dimension_r_ += num_r;
-	for(int i = 0; i < num_r; i++)
+	for (int i = 0; i < num_r; i++)
 		row_heads.insert(new row_(arraycols), index);
 }
 
@@ -110,22 +108,23 @@ void matrix::addcols(int index, int num_c)
 {
 	if (index < 0 || index > dimension_c_)
 		throw runtime_error("invalid index number to add columns.");
-	if (dimension_c_ + num_c> arraycols)
+	if (dimension_c_ + num_c > arraycols)
 	{
 		arraycols = dimension_c_ + num_c + extra;
-		for(int i = 0; i < row_heads.size_; i++)
+		for (int i = 0; i < row_heads.size_; i++)
 		{
 			row_* newrow = new row_(arraycols);
-			for(int j = 0; j < index; j++)
+			for (int j = 0; j < index; j++)
 				newrow[j] = row_heads[i][j];
-			for(int j = index + num_c; j < dimension_c_; j++)
+			for (int j = index + num_c; j < dimension_c_; j++)
 				newrow[j] = row_heads[i][j - num_c];
 			row_heads[i] = *newrow;
 		}
-	}else
+	}
+	else
 	{
-		for(int i = dimension_c_ - 1; i >= index; i--)
-			for(int j = 0; j < dimension_r_; j++)
+		for (int i = dimension_c_ - 1; i >= index; i--)
+			for (int j = 0; j < dimension_r_; j++)
 				row_heads[j][i + num_c] = row_heads[j][i];
 	}
 	dimension_c_ += num_c;
@@ -136,7 +135,7 @@ void matrix::removerows(int index, int num_r)
 	if (index < 0 || index > dimension_r_)
 		throw runtime_error("invalid index number to add rows");
 	dimension_r_ += num_r;
-	for(int i = 0; i < num_r; i++)
+	for (int i = 0; i < num_r; i++)
 		row_heads.remove(index);
 }
 
@@ -147,19 +146,20 @@ void matrix::removecols(int index, int num_c)
 	if (dimension_c_ - num_c < arraycols - extra)
 	{
 		arraycols = dimension_c_ - num_c + extra;
-		for(int i = 0; i < row_heads.size_; i++)
+		for (int i = 0; i < row_heads.size_; i++)
 		{
 			row_* newrow = new row_(arraycols);
-			for(int j = 0; j < index; j++)
+			for (int j = 0; j < index; j++)
 				newrow[j] = row_heads[i][j];
-			for(int j = index + num_c; j < dimension_c_; j++)
+			for (int j = index + num_c; j < dimension_c_; j++)
 				newrow[j - num_c] = row_heads[i][j];
 			row_heads[i] = *newrow;
 		}
-	}else
+	}
+	else
 	{
-		for(int i = index + num_c; i < dimension_r_; i++)
-			for(int j = 0; j < dimension_r_; j++)
+		for (int i = index + num_c; i < dimension_r_; i++)
+			for (int j = 0; j < dimension_r_; j++)
 				row_heads[j][i] = row_heads[j][i + num_c];
 	}
 	dimension_c_ -= num_c;
@@ -169,7 +169,7 @@ matrix* matrix::getrow(int index)
 {
 	dimension newdim(1, dimension_c_);
 	matrix* temp = new matrix(newdim);
-	for(int i = 0; i < dimension_c_; i++)
+	for (int i = 0; i < dimension_c_; i++)
 		temp[0][i] = row_heads[index][i];
 	return temp;
 }
@@ -178,7 +178,7 @@ matrix* matrix::gotcol(int index)
 {
 	dimension newdim(dimension_c_, 1);
 	matrix* temp = new matrix(newdim);
-	for(int i = 0; i < dimension_c_; i++)
+	for (int i = 0; i < dimension_c_; i++)
 		temp[i][0] = row_heads[i][index];
 	return temp;
 }
@@ -204,15 +204,173 @@ matrix& matrix::operator=(const matrix& newone)
 string matrix::tostring()
 {
 	ostringstream s;
-	for(int i = 0; i < dimension_r_; i++)
+	for (int i = 0; i < dimension_r_; i++)
 	{
-		for(int j = 0; j < dimension_c_; j++)
+		for (int j = 0; j < dimension_c_; j++)
 		{
 			s << row_heads[i][j] << '\t';
 		}
 		s << "\n";
 	}
 	return s.str();
+}
+
+bool operator==(matrix& first, matrix& second)
+{
+	if (first.dimension_c_ != second.dimension_c_
+			|| first.dimension_r_ != second.dimension_r_)
+		return false;
+	for (int i = 0; i < first.dimension_r_; i++)
+	{
+		for (int j = 0; j < first.dimension_c_; j++)
+		{
+			if (first[i][j] != second[i][j])
+				return false;
+		}
+	}
+	return true;
+}
+
+bool operator!=(matrix& first, matrix& second)
+{
+	return !(first == second);
+}
+
+matrix* operator+(matrix& first, matrix& second)
+{
+	if (first.dimension_c_ != second.dimension_c_
+			|| first.dimension_r_ != second.dimension_r_)
+		throw runtime_error(
+				"trying to add two matrix with different dimension");
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = first[i][j] + second[i][j];
+	return newmatrix;
+}
+
+matrix* operator-(matrix& first, matrix& second)
+{
+	if (first.dimension_c_ != second.dimension_c_
+			|| first.dimension_r_ != second.dimension_r_)
+		throw runtime_error(
+				"trying to add two matrix with different dimension");
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = first[i][j] - second[i][j];
+	return newmatrix;
+}
+
+matrix* operator/(matrix& first, matrix& second)
+{
+	if (first.dimension_c_ != second.dimension_c_
+			|| first.dimension_r_ != second.dimension_r_)
+		throw runtime_error(
+				"trying to add two matrix with different dimension");
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = first[i][j] / second[i][j];
+	return newmatrix;
+}
+
+matrix* operator/(matrix& first, double second)
+{
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = first[i][j] / second;
+	return newmatrix;
+}
+
+matrix* operator/(double first, matrix& second)
+{
+	matrix* newmatrix = new matrix(
+			*(new dimension(second.dimension_r_, second.dimension_c_)));
+	for (int i = 0; i < second.dimension_r_; i++)
+		for (int j = 0; j < second.dimension_c_; j++)
+			newmatrix[i][j] = first / second[i][j];
+	return newmatrix;
+}
+
+matrix* operator*(double first, matrix& second)
+{
+	matrix* newmatrix = new matrix(
+			*(new dimension(second.dimension_r_, second.dimension_c_)));
+	for (int i = 0; i < second.dimension_r_; i++)
+		for (int j = 0; j < second.dimension_c_; j++)
+			newmatrix[i][j] = first * second[i][j];
+	return newmatrix;
+}
+
+matrix* operator*(matrix& first, double second)
+{
+	return second * first;
+}
+
+matrix* operator>>(matrix& first, matrix& second)
+{
+	if (first.dimension_c_ != second.dimension_c_
+			|| first.dimension_r_ != second.dimension_r_)
+		throw runtime_error(
+				"trying to add two matrix with different dimension");
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = first[i][j] * second[i][j];
+	return newmatrix;
+}
+
+matrix* log(matrix& first)
+{
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, first.dimension_c_)));
+	for (int i = 0; i < first.dimension_r_; i++)
+		for (int j = 0; j < first.dimension_c_; j++)
+			newmatrix[i][j] = log(first[i][j]);
+	return newmatrix;
+}
+
+double sum(matrix& first)
+{
+	double sum = 0.0;
+	for(int i = 0; i < first.dimension_r_; i++)
+		for(int j = 0; j < first.dimension_c_; j++)
+			sum += first[i][j];
+	return sum;
+}
+
+matrix& operator*(matrix& first, matrix& second)
+{
+	if(first.dimension_c_ != second.dimension_r_)
+		throw runtime_error("incorrect dimension of two matrix");
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_r_, second.dimension_c_)));
+	for(int i = 0; i < newmatrix->dim_.diemnsion_r_; i++)
+		for(int j = 0; j < newmatrix->dim_.dimension_c_; j++)
+		{
+			double sum = 0.0;
+			for(int t = 0; t < first.dimension_c_; t++)
+				sum += first[i][t] * second[t][j];
+			newmatrix[i][j] = sum;
+		}
+	return *newmatrix;
+}
+
+matrix& operator!(matrix& first)
+{
+	matrix* newmatrix = new matrix(
+			*(new dimension(first.dimension_c_, first.dimension_r_)));
+	for(int i = 0; i < first.dimension_c_; i++)
+		for(int j = 0; j < first.dimension_r_; j++)
+			newmatrix[i][j] = first[j][i];
+	return *newmatrix;
 }
 
 } /* namespace std */

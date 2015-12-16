@@ -17,6 +17,10 @@ private:
 		helper* next_;
 		helper* previous_;
 		T* value_;
+//		virtual ~helper()
+//		{
+//			if(value_ != NULL) delete value_;
+//		}
 	};
 	helper head_;
 	helper tail_;
@@ -30,10 +34,10 @@ public:
 		tail_.previous_ = &head_;
 		tail_.next_ = 0;
 	}
-//	void add(T* element)
-//	{
-//		insert(element, size_);
-//	}
+	void add(T* element)
+	{
+		insert(element, size_);
+	}
 	void add(T& element)
 	{
 		insert(&element, size_);
@@ -57,6 +61,7 @@ public:
 	}
 	void remove(int index)
 	{
+		cout << "removing " << index << endl;
 		if(index >= size_)
 			throw runtime_error("index out of bound");
 		helper* current = &head_;
@@ -64,8 +69,8 @@ public:
 			current = current->next_;
 		current->previous_->next_ = current->next_;
 		current->next_->previous_ = current->previous_;
-		delete current;
 		size_ --;
+		delete current;
 	}
 	T& operator[](int index)
 	{
@@ -78,8 +83,11 @@ public:
 	}
 	virtual ~linkedlist()
 	{
-		for(int i = 0; i < size_; i++)
+		for(int i = size_ - 1; i >= 0; i--){
+			cout << "going to remove " << i << endl;
 			remove(i);
+			cout << "size = " << size_ << endl;
+		}
 	}
 };
 

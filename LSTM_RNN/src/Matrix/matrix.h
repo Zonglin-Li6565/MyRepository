@@ -9,8 +9,10 @@
 #define MATRIX_H_
 #include <string>
 #include <sstream>
+#include <stdexcept>
+#include <cmath>
 #include "./Dimension/dimension.h"
-#include "./List/linkedlist.h"
+#include "./List/linkedlist.cpp"
 
 namespace std
 {
@@ -18,7 +20,8 @@ namespace std
 class matrix
 {
 private:
-	struct row_{
+	struct row_
+	{
 		int size_;
 		double* array_;
 		row_();
@@ -26,10 +29,10 @@ private:
 		double& operator[](int index);
 	};
 	linkedlist<row_> row_heads;
-	int dimension_c_;
-	int dimension_r_;
 	int arraycols;
 public:
+	int dimension_c_;
+	int dimension_r_;
 	dimension dim_;
 	string name_;
 	matrix();										//done
@@ -49,22 +52,22 @@ public:
 	virtual ~matrix();								//done
 };
 //logical operations
-bool operator!=(const matrix& first, const matrix& second);
-bool operator==(const matrix& first, const matrix& second);
+bool operator!=(matrix& first, matrix& second);
+bool operator==(matrix& first, matrix& second);
 //the element level operations
-matrix* operator+(const matrix& first, const matrix& second);					//matrix matrix addition
-matrix* operator-(const matrix& first, const matrix& second);					//matrix matrix subtraction
-matrix* operator/(const matrix& first, const matrix& second);					//matrix matrix division
-matrix* operator/(double first, const matrix& second);							//matrix number division
-matrix* operator/(const matrix& first, double second);							//matrix number division
-matrix* operator*(double first, const matrix& second);							//matrix number multiplication
-matrix* operator*(const matrix& first, double second);							//matrix number multiplication
-matrix* operator>>(const matrix& first, const matrix& second);					//matrix matrix multiplication
-matrix* log(const matrix& first);												//get a new matrix filled with log of each elements in original matrix
-double sum(const matrix& first);												//get the sum of all the elements in the matrix
+matrix* operator+(matrix& first, matrix& second);		//matrix matrix addition
+matrix* operator-(matrix& first, matrix& second);	//matrix matrix subtraction
+matrix* operator/(matrix& first, matrix& second);		//matrix matrix division
+matrix* operator/(double first, matrix& second);		//matrix number division
+matrix* operator/(matrix& first, double second);		//matrix number division
+matrix* operator*(double first, matrix& second);//matrix number multiplication
+matrix* operator*(matrix& first, double second);//matrix number multiplication
+matrix* operator>>(matrix& first, matrix& second);//matrix matrix multiplication
+matrix* log(matrix& first);	//get a new matrix filled with log of each elements in original matrix
+double sum(matrix& first);		//get the sum of all the elements in the matrix
 //the matrix level operations
-matrix* operator*(const matrix& first, const matrix& second);					//matrix matrix multiplication
-matrix* operator!(const matrix& first);											//transpose
+matrix& operator*(matrix& first, matrix& second);//matrix matrix multiplication
+matrix& operator!(matrix& first);									//transpose
 } /* namespace std */
 
 #endif /* MATRIX_H_ */
