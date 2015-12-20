@@ -7,9 +7,6 @@
 #include <stdexcept>
 #include <iostream>
 
-namespace std
-{
-
 template <typename T>class linkedlist
 {
 private:
@@ -41,7 +38,7 @@ public:
 	void insert(T* element, int index)
 	{
 		if(index > size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* newelement = new helper();
 		newelement->value_ = element;
 		helper* current = &head_;
@@ -58,7 +55,7 @@ public:
 	void remove(int index)
 	{
 		if(index >= size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* current = &head_;
 		for(int i = 0; i <= index; i++)
 			current = current->next_;
@@ -70,7 +67,7 @@ public:
 	T& operator[](int index)
 	{
 		if(index >= size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* current = &head_;
 		for(int i = 0; i <= index; i++)
 			current = current->next_;
@@ -82,5 +79,3 @@ public:
 			remove(i);
 	}
 };
-
-} /* namespace std */

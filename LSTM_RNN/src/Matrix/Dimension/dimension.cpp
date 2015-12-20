@@ -7,9 +7,6 @@
 
 #include "dimension.h"
 
-namespace std
-{
-
 dimension::dimension()
 {
 	dimension_c_ = 1;
@@ -26,4 +23,11 @@ dimension::~dimension()
 {
 }
 
-} /* namespace std */
+namespace std {
+
+bool operator==(dimension& first, dimension& second)
+{
+	return first.diemnsion_r_ == second.diemnsion_r_ && first.dimension_c_ == second.dimension_c_;
+}
+
+}

@@ -8,9 +8,6 @@
 #ifndef DIMENSION_H_
 #define DIMENSION_H_
 
-namespace std
-{
-
 class dimension
 {
 public:
@@ -21,6 +18,8 @@ public:
 	virtual ~dimension();
 };
 
-} /* namespace std */
+namespace std {
+bool operator==(dimension& first, dimension& second);
+}
 
 #endif /* DIMENSION_H_ */
