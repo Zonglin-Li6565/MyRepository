@@ -4,23 +4,20 @@
  *  Created on: Dec 4, 2015
  *      Author: zonglin
  */
-
+#include<string>
 #ifndef DIMENSION_H_
 #define DIMENSION_H_
-
-namespace std
-{
 
 class dimension
 {
 public:
-	int dimension_c_;
-	int diemnsion_r_;
-	dimension(int r, int c);
+	size_t dimension_c_;
+	size_t dimension_r_;
+	dimension(size_t r, size_t c);
 	dimension();
 	virtual ~dimension();
+	bool operator==(dimension& second);
+	std::string tostring();
 };
-
-} /* namespace std */
 
 #endif /* DIMENSION_H_ */

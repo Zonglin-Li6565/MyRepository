@@ -6,24 +6,33 @@
  */
 
 #include "dimension.h"
+#include <sstream>
+#include <iostream>
 
-namespace std
+bool dimension::operator==(dimension& second)
 {
+	return dimension_r_ == second.dimension_r_ && dimension_c_ == second.dimension_c_;
+}
 
 dimension::dimension()
 {
 	dimension_c_ = 1;
-	diemnsion_r_ = 1;
+	dimension_r_ = 1;
 }
 
-dimension::dimension(int r, int c)
+dimension::dimension(size_t r, size_t c)
 {
 	dimension_c_ = c;
-	diemnsion_r_ = r;
+	dimension_r_ = r;
 }
 
 dimension::~dimension()
 {
 }
 
-} /* namespace std */
+std::string dimension::tostring()
+{
+  std::stringstream strm;
+  strm << '(' << dimension_r_ << " x " << dimension_c_ << ')';
+  return strm.str();
+}

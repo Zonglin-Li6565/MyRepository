@@ -1,0 +1,23 @@
+/*
+ * dimension.h
+ *
+ *  Created on: Dec 4, 2015
+ *      Author: zonglin
+ */
+#include<string>
+#ifndef DIMENSION_H_
+#define DIMENSION_H_
+
+class dimension
+{
+public:
+	int dimension_c_;
+	int dimension_r_;
+	dimension(int r, int c);
+	dimension();
+	virtual ~dimension();
+	bool operator==(dimension& second);
+	std::string tostring();
+};
+
+#endif /* DIMENSION_H_ */

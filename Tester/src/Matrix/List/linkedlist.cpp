@@ -5,9 +5,7 @@
  *      Author: zonglin
  */
 #include <stdexcept>
-
-namespace std
-{
+#include <iostream>
 
 template <typename T>class linkedlist
 {
@@ -29,14 +27,18 @@ public:
 		tail_.previous_ = &head_;
 		tail_.next_ = 0;
 	}
-	void add(T* element)
+//	void add(T* element)
+//	{
+//		insert(element, size_);
+//	}
+	void add(T& element)
 	{
-		insert(element, size_);
+		insert(&element, size_);
 	}
 	void insert(T* element, int index)
 	{
 		if(index > size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* newelement = new helper();
 		newelement->value_ = element;
 		helper* current = &head_;
@@ -53,7 +55,7 @@ public:
 	void remove(int index)
 	{
 		if(index >= size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* current = &head_;
 		for(int i = 0; i <= index; i++)
 			current = current->next_;
@@ -65,7 +67,7 @@ public:
 	T& operator[](int index)
 	{
 		if(index >= size_)
-			throw runtime_error("index out of bound");
+			throw std::runtime_error("index out of bound");
 		helper* current = &head_;
 		for(int i = 0; i <= index; i++)
 			current = current->next_;
@@ -77,5 +79,3 @@ public:
 			remove(i);
 	}
 };
-
-} /* namespace std */

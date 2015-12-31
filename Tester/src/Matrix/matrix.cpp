@@ -7,212 +7,368 @@
 
 #include "matrix.h"
 #include <algorithm>
+#include <cstring>
 #include <stdexcept>
-#define extra 5
 
-namespace std
+void matrix::initialize(size_t rows, size_t cols)
 {
-
-matrix::row_::row_()
-{
-	array_ = new double[5];
-	size_ = 5;
-}
-
-matrix::row_::row_(int size)
-{
-	array_ = new double[size];
-	size_ = size;
-}
-
-double& matrix::row_::operator[](int index)
-{
-	if(index > size_)
-		throw runtime_error("index out of bound");
-	return array_[index];
+  dimension_r_ = rows;
+  dimension_c_ = cols;
+  if(_cols_ != NULL) delete _cols_;
+  _cols_ = new std::vector<double*>(cols);
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+  	(*_cols_)[i] = new double[rows];
+  }
 }
 
 matrix::matrix()
 {
-	dimension_c_ = 2;
-	dimension_r_ = 2;
-	arraycols = dimension_c_ + extra;
-	for (int i = 0; i < dimension_r_; i++)
-	{
-		row_heads.add(new row_(arraycols));
-	}
+	initialize(1, 1);
+}
+
+matrix::matrix(size_t rows, size_t cols)
+{
+	initialize(rows, cols);
 }
 
 matrix::matrix(dimension& d)
 {
-	dimension_c_ = d.dimension_c_;
-	dimension_r_ = d.diemnsion_r_;
-	arraycols = dimension_c_ + extra;
-	for (int i = 0; i < dimension_r_; i++)
-	{
-		row_heads.add(new row_(arraycols));
-	}
-	//delete &d;
+	initialize(d.dimension_r_, d.dimension_c_);
 }
 
-matrix::matrix(dimension& d, string name)
+matrix::matrix(const matrix& copy)
 {
-	name_ = name;
-	dimension_c_ = d.dimension_c_;
-	dimension_r_ = d.diemnsion_r_;
-	arraycols = dimension_c_ + extra;
-	for (int i = 0; i < dimension_r_; i++)
+	initialize(copy.dimension_r_, copy.dimension_c_);
+	for(size_t i = 0; i < dimension_r_; i++)
 	{
-		row_heads.add(new row_(arraycols));
+	  for(size_t j = 0; j < dimension_c_; j++)
+	  {
+	    (*_cols_)[j][i] = copy.access(i, j);
+	  }
 	}
-	delete &d;
-}
-
-matrix::matrix(matrix& copy)
-{
-	dimension* dim = copy.getdimension();
-	dimension_c_ = dim->dimension_c_;
-	dimension_r_ = dim->diemnsion_r_;
-	arraycols = dimension_c_ + extra;
-	for (int i = 0; i < dimension_r_; i++)
-	{
-		row_heads.add(new row_(arraycols));
-		for(int j = 0; j < dimension_c_; j++)
-		{
-			row_heads[i][j] = copy[i][j];
-		}
-	}
-}
-
-dimension* matrix::getdimension()
-{
-	return new dimension(dimension_r_, dimension_c_);
 }
 
 matrix::~matrix()
 {
-	delete &row_heads;
-	delete &dimension_c_;
-	delete &dimension_r_;
-	delete &arraycols;
+  free();
 }
 
-void matrix::addrows(int index, int num_r)
+void matrix::free()
 {
-	if (index < 0 || index > dimension_r_)
-		throw runtime_error("invalid index number to add rows");
-	dimension_r_ += num_r;
-	for(int i = 0; i < num_r; i++)
-		row_heads.insert(new row_(arraycols), index);
+  for(size_t i = 0; i < dimension_c_; i++)
+  {
+    delete[] (*_cols_)[i];
+  }
+  delete _cols_;
+  _cols_ = NULL;
 }
 
-void matrix::addcols(int index, int num_c)
+double& matrix::access(size_t row, size_t col) const
 {
-	if (index < 0 || index > dimension_c_)
-		throw runtime_error("invalid index number to add columns.");
-	if (dimension_c_ + num_c> arraycols)
+	return (*_cols_)[col][row];
+}
+
+void matrix::addcols(size_t index, size_t num_c, double value)
+{
+  for(size_t i = 0; i < num_c; i++)
+  {
+  	double* _newcol = new double[dimension_r_];
+  	std::fill_n(_newcol, dimension_r_, value);
+  	_cols_->insert(_cols_->begin() + index, _newcol);
+  }
+  dimension_c_ += num_c;
+}	
+
+void matrix::removecols(size_t index, size_t num_c)
+{
+  for(size_t i = 0; i < num_c; i++)
+  {
+  	delete (*_cols_)[i + index];
+  }
+  _cols_->erase(_cols_->begin() + index, _cols_->begin() + index + num_c);
+  dimension_c_ -= num_c;
+}
+
+matrix matrix::getrow(size_t index) const
+{
+	matrix temp(1, dimension_c_);
+	for (size_t i = 0; i < dimension_c_; i++)
 	{
-		arraycols = dimension_c_ + num_c + extra;
-		for(int i = 0; i < row_heads.size_; i++)
-		{
-			row_* newrow = new row_(arraycols);
-			for(int j = 0; j < index; j++)
-				newrow[j] = row_heads[i][j];
-			for(int j = index + num_c; j < dimension_c_; j++)
-				newrow[j] = row_heads[i][j - num_c];
-			row_heads[i] = *newrow;
-		}
-	}else
-	{
-		for(int i = dimension_c_ - 1; i >= index; i--)
-			for(int j = 0; j < dimension_r_; j++)
-				row_heads[j][i + num_c] = row_heads[j][i];
+		temp(0, i) = access(index, i);
 	}
-	dimension_c_ += num_c;
-}
-
-void matrix::removerows(int index, int num_r)
-{
-	if (index < 0 || index > dimension_r_)
-		throw runtime_error("invalid index number to add rows");
-	dimension_r_ += num_r;
-	for(int i = 0; i < num_r; i++)
-		row_heads.remove(index);
-}
-
-void matrix::removecols(int index, int num_c)
-{
-	if (index < 0 || index > dimension_c_)
-		throw runtime_error("invalid index number to add columns.");
-	if (dimension_c_ - num_c < arraycols - extra)
-	{
-		arraycols = dimension_c_ - num_c + extra;
-		for(int i = 0; i < row_heads.size_; i++)
-		{
-			row_* newrow = new row_(arraycols);
-			for(int j = 0; j < index; j++)
-				newrow[j] = row_heads[i][j];
-			for(int j = index + num_c; j < dimension_c_; j++)
-				newrow[j - num_c] = row_heads[i][j];
-			row_heads[i] = *newrow;
-		}
-	}else
-	{
-		for(int i = index + num_c; i < dimension_r_; i++)
-			for(int j = 0; j < dimension_r_; j++)
-				row_heads[j][i] = row_heads[j][i + num_c];
-	}
-	dimension_c_ -= num_c;
-}
-
-matrix* matrix::getrow(int index)
-{
-	dimension newdim(1, dimension_c_);
-	matrix* temp = new matrix(newdim);
-	for(int i = 0; i < dimension_c_; i++)
-		temp[0][i] = row_heads[index][i];
 	return temp;
 }
 
-matrix* matrix::gotcol(int index)
+matrix matrix::getcol(size_t index) const
 {
-	dimension newdim(dimension_c_, 1);
-	matrix* temp = new matrix(newdim);
-	for(int i = 0; i < dimension_c_; i++)
-		temp[i][0] = row_heads[i][index];
+	matrix temp(dimension_r_, 1);
+	for (size_t i = 0; i < dimension_r_; i++)
+	{
+		temp(i, 0) = access(i, index);
+	}
 	return temp;
 }
 
-matrix::row_& matrix::operator[](int index)
+dimension matrix::getdimension() const
 {
-	return row_heads[index];
+	return dimension(dimension_r_, dimension_c_);
+}
+
+double& matrix::operator()(size_t row, size_t col)
+{
+  return (*_cols_)[col][row];
 }
 
 matrix& matrix::operator=(const matrix& newone)
 {
 	if (this == &newone)
 		return *this;
-	this->row_heads = newone.row_heads;
-	this->dimension_c_ = newone.dimension_c_;
-	this->dimension_r_ = newone.dimension_r_;
-	this->arraycols = newone.arraycols;
-	this->dim_ = newone.dim_;
-	this->name_ = newone.name_;
+	free();
+	initialize(newone.dimension_r_, newone.dimension_c_);
+	for(size_t i = 0; i < dimension_c_; i++)
+	{
+	  memcpy((*_cols_)[i], (*newone._cols_)[i], dimension_r_);
+	}
 	return *this;
 }
 
-string matrix::tostring()
+std::string matrix::tostring()
 {
-	ostringstream s;
-	for(int i = 0; i < dimension_r_; i++)
+	std::ostringstream s;
+	double fac = pow(10, 4);
+	for (size_t i = 0; i < dimension_r_; i++)
 	{
-		for(int j = 0; j < dimension_c_; j++)
+		for (size_t j = 0; j < dimension_c_; j++)
 		{
-			s << row_heads[i][j] << '\t';
+			s << round((*_cols_)[j][i] * fac) / fac << '\t';
 		}
 		s << "\n";
 	}
 	return s.str();
 }
 
-} /* namespace std */
+bool matrix::operator==(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_c_
+      || dimension_r_ != right.dimension_r_)
+    return false;
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+    for (size_t j = 0; j < dimension_c_; j++)
+    {
+      if (access(i, j) != right.access(i, j))
+      {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+bool matrix::operator!=(const matrix& right) const
+{
+  return !((*this) == right);
+}
+
+matrix matrix::operator+(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_c_
+      || dimension_r_ != right.dimension_r_)
+    perror("trying to add two matrix with different dimension");
+  matrix newmatrix(dimension_r_, dimension_c_);
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+    for (size_t j = 0; j < dimension_c_; j++)
+    {
+      newmatrix(i, j) = access(i, j) + right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix matrix::operator-(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_c_
+      || dimension_r_ != right.dimension_r_)
+    perror("trying to minus one matrix by another one with different dimension");
+  matrix newmatrix(dimension_r_, dimension_c_);
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+    for (size_t j = 0; j < dimension_c_; j++)
+    {
+      newmatrix(i, j) = access(i, j) - right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix matrix::operator/(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_c_
+      || dimension_r_ != right.dimension_r_)
+    perror("trying to divide one matrix by another one with different dimension");
+  matrix newmatrix(dimension_r_, dimension_c_);
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+    for (size_t j = 0; j < dimension_c_; j++)
+    {
+      newmatrix(i, j) = access(i, j) / right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix matrix::operator>>(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_c_
+      || dimension_r_ != right.dimension_r_)
+    perror("trying to do element multiplication on two matrices with different dimension");
+  matrix newmatrix(dimension_r_, dimension_c_);
+  for (size_t i = 0; i < dimension_r_; i++)
+  {
+    for (size_t j = 0; j < dimension_c_; j++)
+    {
+      newmatrix(i, j) = access(i, j) * right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix matrix::operator*(const matrix& right) const
+{
+  if (dimension_c_ != right.dimension_r_)
+    perror("cross multiplying two matrices have incompatible dimensions");
+  matrix newmatrix(dimension_r_, right.dimension_c_);
+  for (size_t i = 0; i < newmatrix.dimension_r_; i++)
+  {
+    for (size_t j = 0; j < newmatrix.dimension_c_; j++)
+    {
+      double sum = 0.0;
+      for (size_t t = 0; t < dimension_c_; t++)
+      {
+        sum += access(i, t) * right.access(t, j);
+      }
+      newmatrix(i, j) = sum;
+    }
+  }
+  return newmatrix;
+}
+
+matrix matrix::operator!() const
+{
+  matrix newmatrix(dimension_c_, dimension_r_);
+  for (size_t i = 0; i < dimension_c_; i++)
+  {
+    for (size_t j = 0; j < dimension_r_; j++)
+    {
+      newmatrix(i, j) = access(j, i);
+    }
+  }
+  return newmatrix;
+}
+
+void matrix::randomize()
+{
+  srand (time(NULL));
+  for(size_t i = 0; i < dimension_r_; i++)
+  {
+    for(size_t j = 0; j < dimension_c_; j++)
+    {
+      (*this)(i, j) = 2.0 * rand() / RAND_MAX - 1;
+    }
+  }
+}
+
+namespace std
+{
+
+matrix operator/(double left, const matrix& right)
+{
+  matrix newmatrix(right.getrowsize(), right.getcolumnsize());
+  for (size_t i = 0; i < right.getrowsize(); i++)
+  {
+    for (size_t j = 0; j < right.getcolumnsize(); j++)
+    {
+      newmatrix(i, j) = left / right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix operator/(const matrix& left, double right)
+{
+  matrix newmatrix(left.getrowsize(), left.getcolumnsize());
+  for (size_t i = 0; i < left.getrowsize(); i++)
+  {
+    for (size_t j = 0; j < left.getcolumnsize(); j++)
+    {
+      newmatrix(i, j) = left.access(i, j) / right;
+    }
+  }
+  return newmatrix;
+}
+
+matrix operator*(double left, const matrix& right)
+{
+  matrix newmatrix(right.getrowsize(), right.getcolumnsize());
+  for (size_t i = 0; i < right.getrowsize(); i++)
+  {
+    for (size_t j = 0; j < right.getcolumnsize(); j++)
+    {
+      newmatrix(i, j) = left * right.access(i, j);
+    }
+  }
+  return newmatrix;
+}
+
+matrix operator*(const matrix& left, double right)
+{
+  matrix newmatrix(left.getrowsize(), left.getcolumnsize());
+  for (size_t i = 0; i < left.getrowsize(); i++)
+  {
+    for (size_t j = 0; j < left.getcolumnsize(); j++)
+    {
+      newmatrix(i, j) = left.access(i, j) * right;
+    }
+  }
+  return newmatrix;
+}
+
+matrix elementcalculation(const matrix& para, double(*_function)(double))
+{
+  matrix newmatrix(para.getrowsize(), para.getcolumnsize());
+  for (size_t i = 0; i < para.getrowsize(); i++)
+  {
+    for (size_t j = 0; j < para.getcolumnsize(); j++)
+    {
+      newmatrix(i, j) = _function(para.access(i, j));
+    }
+  }
+  return newmatrix;
+}
+
+matrix logmatrix(const matrix& para)
+{
+  return elementcalculation(para, &log);
+}
+
+matrix tanhmatrix(const matrix& para)
+{
+  return elementcalculation(para, &tanh);
+}
+
+double sum(const matrix& para)
+{
+	double sum = 0.0;
+	for (size_t i = 0; i < para.getrowsize(); i++)
+	{
+    for (size_t j = 0; j < para.getcolumnsize(); j++)
+    {
+      sum += para.access(i, j);
+    }
+	}
+	return sum;
+}
+
+}
