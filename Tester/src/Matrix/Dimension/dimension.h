@@ -16,7 +16,7 @@ public:
 	dimension(size_t r, size_t c);
 	dimension();
 	virtual ~dimension();
-	bool operator==(dimension& second);
+	bool operator==(const dimension& second) const;
 	std::string tostring();
 };
 

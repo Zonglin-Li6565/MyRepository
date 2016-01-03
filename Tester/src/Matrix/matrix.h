@@ -23,11 +23,13 @@ private:
   	size_t dimension_c_;
   	size_t dimension_r_;
   	void initialize(size_t rows, size_t cols);
+  	double* getcolumnhead_const(size_t index) const;
+  	double* getcolumnhead(size_t index);
   	void free();
 public:
 	matrix();
 	matrix(size_t rows, size_t cols);
-	matrix(dimension& d);
+	matrix(const dimension& d);
 	matrix(const matrix& copy);
 	~matrix();
 	double& access(size_t row, size_t col) const;
@@ -36,6 +38,10 @@ public:
 	void removerows(size_t index, size_t num_r);
 	void removecols(size_t index, size_t num_c);
 	/**
+	 * Fill the matrix with value;
+	 */
+	void fill(double value);
+	/**
 	 * The returned matrix is independent to the original one.
 	 */
 	matrix getrow(size_t index) const;
@@ -43,12 +49,18 @@ public:
 	 * The returned matrix is independent to the original one.
 	 */
 	matrix getcol(size_t index) const;
+	/**
+	 * Return the dimension of this matrix
+	 */
 	dimension getdimension() const;
+	/**
+	 * Non constant access operator
+	 */
 	double& operator()(size_t row, size_t col);
 	/**
 	 * The objects on both sides are independent to each other;
 	 */
-	matrix& operator=(const matrix& newone);
+	matrix& operator=(const matrix& right);
 	/**
 	 * Get the number of rows
 	 */
@@ -83,6 +95,14 @@ public:
 	 * Matrix matrix division
 	 */
 	matrix operator/(const matrix& right) const;
+  /**
+   * Increment modifier
+   */
+  void operator+=(const matrix& right);
+  /**
+   * Decrease modifier
+   */
+  void operator-=(const matrix& right);
 	/**
 	 * Matrix matrix multiplication
 	 */
@@ -105,6 +125,14 @@ public:
 namespace std
 {
 ////////////////////the element level operations////////////////////
+/**
+ * Number matrix subtraction
+ */
+matrix operator-(double left, const matrix& right);
+/**
+ * Matrix number subtraction
+ */
+matrix operator-(const matrix& left, double right);
 /**
  * Number matrix division
  */

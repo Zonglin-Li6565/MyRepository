@@ -10,13 +10,14 @@
 
 class memorycell
 {
+private:
+  matrix* _currentvalue_;
+  matrix* _previousvalue_;
 public:
-	matrix currentvalue_;
-	matrix previousvalue_;
-	void updatevalue(matrix value);
+	void updatevalue(const matrix& value);
 	memorycell();
-	memorycell(dimension dim);
-	virtual ~memorycell();
+	memorycell(const dimension& dim);
+	~memorycell();
 };
 
 #endif /* MEMORYCELL_H_ */

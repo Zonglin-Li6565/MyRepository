@@ -13,12 +13,12 @@
 class forwardnode
 {
 private:
-  size_t m_;
+  double m_;
   matrix* _weights_;
   matrix* _weighterrors_;
   matrix* _input_;
-  matrix(*_activation_)(matrix&);
-  matrix(*_derivative_)(matrix&);
+  matrix(*_activation_)(const matrix&);
+  matrix(*_derivative_)(const matrix&);
 public:
   /**
    * Default constructor. Set everything to NULL or 0
@@ -44,11 +44,11 @@ public:
 	/**
 	 * Set the activation function
 	 */
-	void setactivationfunction(const matrix&(*activation)(matrix&));
+	void setactivationfunction(matrix(*activation)(const matrix&));
 	/**
 	 * Set the derivative of activation function
 	 */
-	void setderivativeactivation(const matrix&(*derivative)(matrix&));
+	void setderivativeactivation(matrix(*derivative)(const matrix&));
 	/**
 	 * Update weights. Before this function is called, the gradients will only accumulate,
 	 * left the weights unchanged.

@@ -9,7 +9,7 @@
 #include <sstream>
 #include <iostream>
 
-bool dimension::operator==(dimension& second)
+bool dimension::operator==(const dimension& second) const
 {
 	return dimension_r_ == second.dimension_r_ && dimension_c_ == second.dimension_c_;
 }

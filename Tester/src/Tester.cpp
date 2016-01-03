@@ -12,8 +12,9 @@
 #include <fstream>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+#include <cmath>
 #include <string>
+#include <iostream>
 #define TIMES 50
 #define M 2000
 using namespace std;
@@ -32,40 +33,27 @@ void datareader()
     istringstream iss(line);
     for(int j = 399; j >= 0; j--)
     {
-      iss >> input[i][j];
+      iss >> input(i, j);
     }
   }
 }
 
-matrix& operator-(double first, matrix& second)
+matrix sigmoid(const matrix& input)
 {
-  matrix& newmatrix = *new matrix(second.getdimension());
-  for(int i = 0; i < second.dimension_r_; i++)
+  matrix newmatrix(input.getdimension());
+  for(size_t i = 0; i < input.getrowsize(); i++)
   {
-    for(int j = 0; j < second.dimension_c_; j++)
+    for(size_t j = 0; j < input.getcolumnsize(); j++)
     {
-      newmatrix[i][j] = first - second[i][j];
+      newmatrix(i, j) = 1.0 / (1.0 + exp(0 - input.access(i, j)));
     }
   }
   return newmatrix;
 }
 
-matrix& sigmoid(matrix& input)
+matrix der_sigmoid(const matrix& input)
 {
-  matrix& newmatrix = *new matrix(input.getdimension());
-  for(int i = 0; i < input.dimension_r_; i++)
-  {
-    for(int j = 0; j < input.dimension_c_; j++)
-    {
-      newmatrix[i][j] = 1.0 / (1.0 + exp( - input[i][j]));
-    }
-  }
-  return newmatrix;
-}
-
-matrix& der_sigmoid(matrix& input)
-{
-  matrix& sig = sigmoid(input);
+  matrix sig = sigmoid(input);
   return sig >> (1 - sig);
 }
 
@@ -73,20 +61,20 @@ void normalize(matrix& input)
 {
   double min = 10000.0;
   double max = -10000.0;
-  for(int i = 0; i < input.getrowsize(); i++)
+  for(size_t i = 0; i < input.getrowsize(); i++)
   {
-    vector<double> row = input[i];
-    for(int j = 0; j < input.dimension_c_; j++)
+    for(size_t j = 0; j < input.getcolumnsize(); j++)
     {
-      if(row[j] < min) min = row[j];
-      if(row[j] > max) max = row[j];
+      if(input(i, j) < min) min = input(i, j);
+      if(input(i, j) > max) max = input(i, j);
     }
   }
-  for(int i = 0; i < input.dimension_r_; i++)
+  for(size_t i = 0; i < input.getrowsize(); i++)
   {
-    vector<double> row = input[i];
-    for(int j = 0; j < input.dimension_c_; j++)
-      row[j] = (row[j] - min) / (max - min);
+    for(size_t j = 0; j < input.getcolumnsize(); j++)
+    {
+      input(i, j) = (input(i, j) - min) / (max - min);
+    }
   }
 }
 
@@ -107,12 +95,11 @@ int main() {
   {
     matrix prediction = f_node.forward(s_node.forward(input));
     matrix error = prediction - desiredoutput;
-    costs[i] = sum(((0 - desiredoutput) >> log(prediction)) - ((1 - desiredoutput) >> log(1 - prediction))) / M;
+//    cout << "error = \n" << error.tostring() << endl;
+    costs[i] = sum(((0 - desiredoutput) >> logmatrix(prediction)) - ((1 - desiredoutput) >> logmatrix(1 - prediction))) / M;
     cout << costs[i] << endl;
-    double lambda = 0.1;
+    double lambda = -0.05;
     s_node.backward(f_node.backward(error, lambda), lambda);
-    f_node.weighterrors_ = &(*f_node.weighterrors_ / M);
-    s_node.weighterrors_ = &(*s_node.weighterrors_ / M);
     f_node.updateweights();
     s_node.updateweights();
   }

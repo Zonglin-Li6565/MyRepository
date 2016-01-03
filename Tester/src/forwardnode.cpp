@@ -7,6 +7,9 @@
 
 #include "forwardnode.h"
 
+///////Debug////////
+#include<iostream>
+
 forwardnode::forwardnode()
 {
   m_ = 0;
@@ -21,10 +24,11 @@ forwardnode::forwardnode(dimension& outputdimension, dimension& inputdimension)
 {
 	if(outputdimension.dimension_r_ != inputdimension.dimension_r_)
 	{
-	  perror("invalid output and input dimension.");
+	  perror("invalid output and input dimension for forward node.");
 	  exit(1);
 	}
-	m_ = inputdimension.dimension_r_;
+	m_ = (double)inputdimension.dimension_r_;
+	_input_ = NULL;
 	_weights_ = new matrix(outputdimension.dimension_c_, inputdimension.dimension_c_ + 1);
 	_weighterrors_ = new matrix(_weights_->getdimension());
 	_weights_->randomize();
@@ -48,9 +52,9 @@ matrix forwardnode::forward(const matrix& input)
 matrix forwardnode::backward(const matrix& error, double lambda)
 {
 	matrix der_input = _derivative_(*_input_);
-	_weighterrors_ = &(*_weighterrors_ + (!error * (*_input_)));
+	*_weighterrors_ += (!error * (*_input_));
 	//////////////////////////regularization//////////////////////////
-  _weighterrors_ = &(*_weighterrors_ + lambda * (*_weights_));
+//  *_weighterrors_ = *_weighterrors_ + std::operator*( lambda, *_weights_);
 	matrix input_grad = error * (*_weights_) >> der_input;
   input_grad.removecols(0, 1);
 	return input_grad;
@@ -63,17 +67,16 @@ void forwardnode::updateweights()
     perror("No gradient of weight to update, or no weights available. Check whether using the default constructor");
     exit(1);
   }
-	_weights_ = &(*_weights_ - *_weighterrors_);
-	delete _weighterrors_;
-	_weighterrors_ = new matrix(_weights_->getdimension());
+	*_weights_ -= std::operator /(*_weighterrors_, m_);
+	_weighterrors_->fill(0);
 }
 
-void forwardnode::setactivationfunction(const matrix& (*activation)(matrix&))
+void forwardnode::setactivationfunction(matrix (*activation)(const matrix&))
 {
 	_activation_ = activation;
 }
 
-void forwardnode::setderivativeactivation(const matrix& (*derivative)(matrix&))
+void forwardnode::setderivativeactivation(matrix (*derivative)(const matrix&))
 {
 	_derivative_ = derivative;
 }

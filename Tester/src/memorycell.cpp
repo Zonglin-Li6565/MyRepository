@@ -7,27 +7,29 @@
 
 #include "memorycell.h"
 
-void memorycell::updatevalue(matrix value)
+void memorycell::updatevalue(const matrix& value)
 {
-	if(!(value.getdimension() == currentvalue_.getdimension()))
+	if(!(value.getdimension() == _currentvalue_->getdimension()))
 		throw std::runtime_error("Try to put matrix with inconsistent dimension");
-	previousvalue_ = currentvalue_;
-	currentvalue_ = value;
+	*_previousvalue_ = *_currentvalue_;
+	*_currentvalue_ = value;
 }
 
 memorycell::memorycell()
 {
-	currentvalue_ = *new matrix(1, 1);
+	_currentvalue_ = new matrix(1, 1);
+	_previousvalue_ = NULL;
 }
 
-memorycell::memorycell(dimension dim)
+memorycell::memorycell(const dimension& dim)
 {
-	currentvalue_ = *new matrix(dim);
+	_currentvalue_ = new matrix(dim);
+	_previousvalue_ = NULL;
 }
 
 memorycell::~memorycell()
 {
-	delete &currentvalue_;
-	delete &previousvalue_;
+	delete &_currentvalue_;
+	delete &_previousvalue_;
 }
 
